@@ -1,6 +1,6 @@
 # SGMA_P
 ShotGun Metagenome Analysis Pipeline.
 
-Currently supports Illumina datasets.
+🦠 Currently supports Illumina datasets.
 
-Check the [Documentation]() site for details.
+[![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-1b7f79)](https://anw-sh.github.io/sgm_py/)

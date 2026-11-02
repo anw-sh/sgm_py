@@ -1,1 +1,128 @@
 /* css styles */
+
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+/* ---------- Tokens ---------- */
+:root {
+  --pl-font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --pl-font-code: "Fira Code", SFMono-Regular, Menlo, Consolas, monospace;
+
+  --pl-h1: #2b3a4a;      /* deep slate */
+  --pl-h2: #e05149;      /* darkened coral, readable on white */
+  --pl-h3: #6b4e71;      /* muted plum */
+  --pl-h4: #6c757d;      /* neutral gray */
+  --pl-accent: #c2453f;  /* links, active nav, code border */
+
+  --pl-code-bg: #f6f8fa;
+  --pl-code-border: #d8dee4;
+  --pl-inline-code: #b4235a;
+  --pl-table-head: #f6efee;
+}
+
+body.quarto-dark {
+  --pl-h1: #cfd8e3;      /* soft blue-gray */
+  --pl-h2: #f08a85;      /* lightened coral */
+  --pl-h3: #c9a9d1;      /* soft plum */
+  --pl-h4: #aab2bd;
+  --pl-accent: #f08a85;
+
+  --pl-code-bg: #1e2227;
+  --pl-code-border: #343a42;
+  --pl-inline-code: #ff8fb8;
+  --pl-table-head: #2f2828;
+}
+
+/* ---------- Typography ---------- */
+body {
+  font-family: var(--pl-font-body);
+  line-height: 1.65;
+  font-size: 0.9rem;
+  color: #495057;
+}
+
+h1, h2, h3, h4, h5, h6,
+.navbar, .sidebar {
+  font-family: var(--pl-font-body);
+}
+
+.navbar {
+    font-weight: 400;
+    font-size: medium;
+    background-color: #5b4b8a;
+}
+
+h1, .title { color: var(--pl-h1); font-weight: 200; }
+h2 { color: var(--pl-h2); font-weight: 300; margin-top: 2rem; }
+h3 { color: var(--pl-h3); font-weight: 400; }
+h4, h5, h6 { color: var(--pl-h4); font-weight: 500; }
+
+h2 {
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid var(--pl-code-border);
+}
+
+a { text-decoration-thickness: 1px; text-underline-offset: 2px; }
+
+/* ---------- Code ---------- */
+code, pre, kbd, samp {
+  font-family: var(--pl-font-code);
+  font-feature-settings: "calt" 1;   /* Fira Code ligatures */
+}
+
+/* div.sourceCode, pre {
+  background: var(--pl-code-bg);
+  border: 1px solid var(--pl-code-border);
+  border-left: 4px solid var(--pl-accent);
+  border-radius: 6px;
+} */
+
+pre code { font-size: 0.825rem; }
+
+p code:not(.sourceCode),
+li code:not(.sourceCode),
+td code:not(.sourceCode) {
+  color: var(--pl-inline-code);
+  background: var(--pl-code-bg);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+  font-size: 0.875em;
+}
+
+/* ---------- Tables ---------- */
+table {
+  font-size: 0.875rem;
+}
+
+thead th {
+  background: var(--pl-table-head);
+  border-bottom: 2px solid var(--pl-accent);
+}
+
+/* ---------- Callouts ---------- */
+.callout {
+  border-radius: 6px;
+}
+
+/* ---------- Navigation ---------- */
+.sidebar-navigation .sidebar-item a.active,
+.sidebar-navigation .sidebar-item a:hover {
+  color: var(--pl-accent);
+}
+
+.sidebar-navigation .sidebar-item-section > .sidebar-item-container > a {
+  font-weight: 600;
+}
+
+#TOC .active, #TOC a:hover {
+  color: var(--pl-accent);
+}
+
+/* ---------- Layout ---------- */
+#quarto-content img {
+  max-width: 100%;
+  border-radius: 4px;
+}
+
+@media (min-width: 992px) {
+  main.content { max-width: 52rem; }
+}

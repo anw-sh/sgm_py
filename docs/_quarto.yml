@@ -6,17 +6,25 @@ website:
   navbar:
     left:
       - href: index.qmd
+        icon: house-fill
         text: Home
-      - about.qmd
-      - workflow.qmd
+      - href: about.qmd
+        icon: info-square-fill
+      - href: workflow.qmd
+        icon: file-earmark-medical
+    right: 
+      - href: https://github.com/anw-sh/sgm_py
+        icon: github
 
 format:
   html:
-    theme:
-      - cosmo
-      - brand
+    theme: journal
     css: styles.css
+    code-copy: true
+    syntax-highlighting: ayu
+    code-line-numbers: true
     toc: true
+    toc-depth: 4
 
 
 
