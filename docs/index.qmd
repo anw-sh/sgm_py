@@ -1,0 +1,5 @@
+---
+title: "SGMA_P: ShotGun Metagenome Analysis Pipeline"
+---
+
+A modular pipeline to analyze shotgun metagenome reads.

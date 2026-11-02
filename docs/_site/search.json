@@ -1,0 +1,23 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "SGMA_P: ShotGun Metagenome Analysis Pipeline",
+    "section": "",
+    "text": "A modular pipeline to analyze shotgun metagenome reads."
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "A modular pipeline to analyze shotgun metagenome reads."
+  },
+  {
+    "objectID": "workflow.html",
+    "href": "workflow.html",
+    "title": "Workflow",
+    "section": "",
+    "text": "How this repo was made… (Notes to Self)"
+  }
+]

@@ -1,0 +1,5 @@
+---
+title: "About"
+---
+
+A modular pipeline to analyze shotgun metagenome reads.
