@@ -16,3 +16,7 @@ Code cleanup is underway, and adding documentation...
 :::
 
 ## Pipeline
+
+## Requirements
+
+- Compressed fastq files (`.gz` format) as input.
