@@ -1,5 +1,6 @@
-# SGMA_P
-ShotGun Metagenome Analysis Pipeline.
+# SGMAP
+
+![SGMAP](docs/images/sgmap-logo.svg)
 
 🦠 Currently supports Illumina datasets.
 

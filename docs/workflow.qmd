@@ -1,5 +1,45 @@
 ---
-title: "Workflow"
+title: Notes
+toc-title: Contents
 ---
 
+```{=html}
+<style>#title-block-header { display: none; }</style>
+```
+
 How this repo was made... [(Notes to Self)]{.small .text-muted}
+
+## New repo
+
+A new public repository, [**sgm_py**]{.text-primary}, was created on <i class="bi bi-github"></i>, including a basic README.md and LICENSE files.
+
+Cloned to a local directory
+```bash
+gh repo clone anw-sh/sgm_py
+```
+
+Made new directories
+```bash
+cd sgm_py
+mkdir -p src/sgm_py docs tests
+```
+
+Generated a Quarto website with [*docs*]{.text-info} as the parent directory. Required `qmd` files were created, and published as <i class="bi bi-github"></i> pages
+```bash
+cd docs
+quarto publish gh-pages
+```
+
+The `root` of `gh-pages` branch was used as source for the [documentation](https://anw-sh.github.io/sgm_py/) site.
+
+Added the cleaned scripts of [mga_p](https://github.com/anw-sh/mga_p) repo to [*src/sgm_py*]{.text-info} directory.
+
+Each script is being documented and saved as website pages.
+
+Changes were committed to the `main` branch.
+```bash
+# In the sgm_py directory
+git add .
+git commit -m 'Add scripts'
+git push origin main
+```

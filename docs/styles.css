@@ -46,9 +46,8 @@ h1, h2, h3, h4, h5, h6,
 }
 
 .navbar {
-    font-weight: 400;
+    font-weight: 300;
     font-size: medium;
-    background-color: #5b4b8a;
 }
 
 h1, .title { color: var(--pl-h1); font-weight: 200; }
@@ -126,3 +125,8 @@ thead th {
 @media (min-width: 992px) {
   main.content { max-width: 52rem; }
 }
+
+/* ---- Title ---- */
+/* .quarto-title-block .title {
+  display: none;
+} */

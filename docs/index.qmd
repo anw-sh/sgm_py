@@ -1,20 +1,18 @@
 ---
-title: "SGMA_P: ShotGun Metagenome Analysis Pipeline"
+title: "Home"
+title-block-style: none
 ---
+
+```{=html}
+<style>#title-block-header { display: none; }</style>
+```
+
+![](images/sgmap-logo.svg)
 
 A modular pipeline to analyze shotgun metagenome reads.
 
-## Test
+:::{.callout-important title="Under development" collapse="true"}
+Code cleanup is underway, and adding documentation...
+:::
 
-```bash
-mkdir test
-```
-
-
-### Test
-
-#### Test
-
-##### Test
-
-###### Test
+## Pipeline
