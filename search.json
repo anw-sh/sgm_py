@@ -1,23 +1,49 @@
 [
   {
-    "objectID": "workflow.html",
-    "href": "workflow.html",
-    "title": "Workflow",
-    "section": "",
-    "text": "How this repo was made… (Notes to Self)"
-  },
-  {
-    "objectID": "about.html",
-    "href": "about.html",
-    "title": "About",
-    "section": "",
-    "text": "A modular pipeline to analyze shotgun metagenome reads."
-  },
-  {
     "objectID": "index.html",
     "href": "index.html",
-    "title": "SGMA_P: ShotGun Metagenome Analysis Pipeline",
+    "title": "Home",
     "section": "",
     "text": "A modular pipeline to analyze shotgun metagenome reads."
+  },
+  {
+    "objectID": "index.html#pipeline",
+    "href": "index.html#pipeline",
+    "title": "Home",
+    "section": "Pipeline",
+    "text": "Pipeline"
+  },
+  {
+    "objectID": "profiles.html",
+    "href": "profiles.html",
+    "title": "Profiles",
+    "section": "",
+    "text": "Select between the following profiles to choose the type of analysis",
+    "crumbs": [
+      "Home",
+      "Profiles"
+    ]
+  },
+  {
+    "objectID": "workflow.html",
+    "href": "workflow.html",
+    "title": "Notes",
+    "section": "",
+    "text": "How this repo was made… (Notes to Self)",
+    "crumbs": [
+      "Home",
+      "Notes"
+    ]
+  },
+  {
+    "objectID": "workflow.html#new-repo",
+    "href": "workflow.html#new-repo",
+    "title": "Notes",
+    "section": "New repo",
+    "text": "New repo\nA new public repository, sgm_py, was created on , including a basic README.md and LICENSE files.\nCloned to a local directory\ngh repo clone anw-sh/sgm_py\nMade new directories\ncd sgm_py\nmkdir -p src/sgm_py docs tests\nGenerated a Quarto website with docs as the parent directory. Required qmd files were created, and published as  pages\ncd docs\nquarto publish gh-pages\nThe root of gh-pages branch was used as source for the documentation site.\nAdded the cleaned scripts of mga_p repo to src/sgm_py directory.\nEach script is being documented and saved as website pages.\nChanges were committed to the main branch.\n# In the sgm_py directory\ngit add .\ngit commit -m 'Add scripts'\ngit push origin main",
+    "crumbs": [
+      "Home",
+      "Notes"
+    ]
   }
 ]
