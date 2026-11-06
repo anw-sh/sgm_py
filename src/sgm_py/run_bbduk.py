@@ -63,7 +63,7 @@ def trim_reads(
     """Trim every sample in the sub_list. Raises RuntimeError at the end if sample failed"""
     missing = [key for key in REQUIRED_KEYS if key not in utility_paths]
     if missing:
-        raise ValueError(f"utility_paths is missing: {", ".join(missing)}")
+        raise ValueError(f"utility_paths is missing: {', '.join(missing)}")
 
     raw_reads, bb_out = Path(raw_reads), Path(bb_out)
     bb_out.mkdir(parents=True, exist_ok=True)
@@ -71,6 +71,8 @@ def trim_reads(
     failed: list[str] = []
 
     for i, sample in enumerate(sub_list, start=1):
+        if common.STOP.is_set():
+            break
         # Common variables for rich colors
         st_sample = f"[blue]{escape(study)}[/blue] {common.EMOJI_PLAY} [magenta]{escape(sample)}[/magenta]"
         sample_count = f"{i}/{len(sub_list)}"

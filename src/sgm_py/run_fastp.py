@@ -30,7 +30,7 @@ def build_fastp_command(reads: list[Path], outputs: list[Path], html_report: Pat
         io = f"-i {q(str(reads[0]))} -o {q(str(outputs[0]))}"
     else:
         io = f"-i {q(str(reads[0]))} -o {q(str(outputs[0]))} -I {q(str(reads[1]))} -O {q(str(outputs[1]))}"
-    return f"fastp {io} -A -A -h {q(str(html_report))} -j {q(str(json_report))} -w {threads}"
+    return f"fastp {io} -D -A -h {q(str(html_report))} -j {q(str(json_report))} -w {threads}"
 
 # Run fastp
 def dedup_reads(
@@ -54,6 +54,8 @@ def dedup_reads(
     failed: list[str] = []
 
     for i, sample in enumerate(sub_list, start=1):
+        if common.STOP.is_set():
+            break
         st_sample = f"[blue]{escape(study)}[/blue] {common.EMOJI_PLAY} [magenta]{escape(sample)}[/magenta]"
         sample_count = f"{i}/{len(sub_list)}"
         status_sub.update(f"[i][dim]Deduplicating reads of [/dim] {st_sample}[dim]: ({sample_count}) | ({st_count}) [/dim][/i]", spinner="point", spinner_style="magenta")

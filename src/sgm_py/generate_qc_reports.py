@@ -57,7 +57,7 @@ def qc_reports(
     """Run FastQC on reads without a report, followed by MultiQC. Returns True on success"""
     missing = [tool for tool in REQUIRED_TOOLS if tool not in utility_paths]
     if missing:
-        raise ValueError(f"utility_paths is missing: {", ".join(missing)}")
+        raise ValueError(f"utility_paths is missing: {', '.join(missing)}")
 
     in_dir, qc_out, mqc_out = Path(in_dir), Path(qc_out), Path(mqc_out)
     qc_out.mkdir(parents=True, exist_ok=True)

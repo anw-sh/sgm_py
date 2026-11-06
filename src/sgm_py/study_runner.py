@@ -99,7 +99,7 @@ def run_studies(
 
                 studies = names_list(base / args.projects)
                 console.print(
-                    panel.fit(f"[dim]{common.EMOJI_SPARKLE} Processing[/] [bold]{len(studies)}[/] [dim]{p.plural("study", len(studies))} from[/] {base_tag} [dim]dir[/]", title="# Studies", border_style="dim cyan"),
+                    panel.fit(f"[dim]{common.EMOJI_SPARKLE} Processing[/] [bold]{len(studies)}[/] [dim]{p.plural('study', len(studies))} from[/] {base_tag} [dim]dir[/]", title="# Studies", border_style="dim cyan"),
                     style="italic",
                 )
                 task = progress.add_task(f"{common.EMOJI_PROCESS} [i][dim]Running {escape(label)} on[/dim] {base_tag} [dim]studies[/dim][/i]", total=len(studies))
@@ -122,7 +122,7 @@ def run_studies(
                             failed.append(study)
                     progress.update(task, advance=1)
 
-                if finish_base is not True:
+                if finish_base is not None:
                     if len(failed) > failed_before:
                         logger.warning(
                             "%s Skipping the final step for %s because %d studies failed. Fix them and rerun with [i pink3]--resume[/]", common.EMOJI_WARNING, escape(base.name), len(failed) - failed_before,

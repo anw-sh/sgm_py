@@ -18,7 +18,7 @@ logger = common.logger
 REQUIRED_KEYS = ("Kraken2", "Bracken", "krakenTools", "kraken_DB")
 K2MPA_DIR = "k2mpa_files"
 MERGED_NAME = "k2mpa_merged.txt"
-DB_FILES = ("has.k2d", "opts.k2d", "taxo.k2d")
+DB_FILES = ("hash.k2d", "opts.k2d", "taxo.k2d")
 MARGIN_GB = 1.5   # Free RAM required on top of the DB size
 SHM_DIR = Path("/dev/shm")
 
@@ -84,7 +84,7 @@ def confidence_value(text: str) -> float:
         value = float(text)
     except ValueError:
         raise argparse.ArgumentTypeError(f"{text!r} is not a number") from None
-    if not 0.0 <= value <- 1.0:
+    if not 0.0 <= value <= 1.0:
         raise argparse.ArgumentTypeError(f"{text} must be between 0 and 1")
     return value
 

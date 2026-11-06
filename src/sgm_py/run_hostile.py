@@ -32,7 +32,7 @@ def build_hostile_command(reads: list[Path], hostile_out: Path, index: str, log:
         io = f"--fastq1 {q(str(reads[0]))} --aligner bowtie2"
     else:
         io = f"--fastq1 {q(str(reads[0]))} --fastq2 {q(str(reads[1]))}"
-    return f"hostile clean {io} --output {q(str(hostile_out))} --index {index} --threads {threads} > {q(str(log))}"
+    return f"hostile clean {io} --output {q(str(hostile_out))} --index {q(index)} --threads {threads} > {q(str(log))}"
 
 def remove_reads(sample: str, directories: Sequence[str | Path]) -> None:
     """Delete a sample's read files from the given directories to save space (intermediate outputs)"""
@@ -68,6 +68,8 @@ def remove_host(
     failed: list[str] = []
 
     for i, sample in enumerate(sub_list, start=1):
+        if common.STOP.is_set():
+            break
         st_sample = f"[blue]{escape(study)}[/blue] {common.EMOJI_PLAY} [magenta]{escape(sample)}[/magenta]"
         sample_count = f"{i}/{len(sub_list)}"
         status_sub.update(f"[i][dim]Removing host reads from [/dim] {st_sample}[dim]: ({sample_count}) | ({st_count}) [/dim][/i]", spinner="point", spinner_style="magenta")

@@ -88,7 +88,7 @@ def run_stages(
     try:
         common.run_concurrently(run_bbduk.trim_reads, split_size, sample_lists, status_subs, study, studies, dirs["raw_reads"], dirs["bb_out"], utility_paths, threads)
     finally:
-        run_bbduk.write_bbduk_results(dirs["bb_out"], study_dir / "bb_out_count.txt")
+        run_bbduk.write_bbduk_results(dirs["bb_out"], study_dir / "bb_out_counts.txt")
     if "fastp" in stages:
         common.run_concurrently(run_fastp.dedup_reads, split_size, sample_lists, status_subs, study, studies, dirs["bb_out"], dirs['fp_out'], utility_paths, threads)
 

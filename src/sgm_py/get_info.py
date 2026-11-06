@@ -72,7 +72,7 @@ def main() -> None:
 
         console.print(
             panel.fit(
-                f"[dim]{common.EMOJI_SPARKLE}[/] [bold]{len(env_paths)}[/] [dim]{p.plural("pair", len(env_paths))} found in {args.csv}[/]",
+                f"[dim]{common.EMOJI_SPARKLE}[/] [bold]{len(env_paths)}[/] [dim]{p.plural('pair', len(env_paths))} found in {args.csv}[/]",
                 title="Info",
                 title_align="left",
                 border_style="dim yellow",
@@ -92,5 +92,6 @@ def main() -> None:
             style="italic red",
         )
 
-    if __name__ == "__main__":
-        main()
+
+if __name__ == "__main__":
+    main()
