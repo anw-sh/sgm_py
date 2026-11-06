@@ -18,28 +18,62 @@ website:
       - href: https://github.com/anw-sh/sgm_py
         icon: github
   sidebar: 
-    contents: auto
+    style: floating
+    contents:
+      - text: SGMAP
+        href: index.qmd
+      - text: Setup
+        href: setup.qmd
+      - text: Run
+        href: run.qmd
+      - section: Modules
+        contents: 
+          - text: QC
+            href: modules/qc.qmd
+          - text: Taxonomy
+            href: modules/taxonomy.qmd
+      - section: Standalone
+        contents: 
+          - text: QC Reports
+            href: scripts/qc_reports.qmd
+          - text: BBDuk
+            href: scripts/bbduk.qmd
+          - text: fastp
+            href: scripts/fastp.qmd
+          - text: Hostile
+            href: scripts/hostile.qmd
+          - text: Kraken2 Suite
+            href: scripts/kraken.qmd
+          - text: MetaPhlAn
+            href: scripts/mpa.qmd
   page-footer: 
     left: "&copy; Anwesh | <script>document.write(new Date().getFullYear());</script>"
     center: 
       - icon: github
         href: https://github.com/anw-sh/sgm_py
+        target: _blank
       - icon: file-earmark-richtext-fill
         href: https://scholar.google.com/citations?user=X885VYAAAAAJ&hl=en
+        target: _blank
       - icon: linkedin
         href: https://www.linkedin.com/in/anwesh-maile-85346a27/
+        target: _blank
       - icon: youtube
         href: https://www.youtube.com/@analysisVenue
-    right: "Built with [Quarto](https://quarto.org/)"
+        target: _blank
+    right: "Built with [Quarto](https://quarto.org/){.external target='_blank'}"
 
 format:
   html:
     theme: journal
     css: styles.css
+    fontsize: 0.9em
     title-prefix: "SGMAP"
     code-copy: true
     syntax-highlighting: ayu
     code-line-numbers: true
+    lightbox: true
+    link-external-icon: true
     toc: true
     toc-depth: 4
     toc-title: Contents

@@ -47,7 +47,7 @@ h1, h2, h3, h4, h5, h6,
 
 .navbar {
     font-weight: 300;
-    font-size: medium;
+    font-size: small;
 }
 
 h1, .title { color: var(--pl-h1); font-weight: 200; }
