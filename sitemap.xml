@@ -1,19 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://anw-sh.github.io/sgm_py/index.html</loc>
-    <lastmod>2026-11-03T06:55:53.479Z</lastmod>
+    <loc>https://anw-sh.github.io/sgm_py/workflow.html</loc>
+    <lastmod>2026-11-03T14:11:06.363Z</lastmod>
   </url>
   <url>
-    <loc>https://anw-sh.github.io/sgm_py/scripts/common.html</loc>
-    <lastmod>2026-11-03T06:42:46.812Z</lastmod>
+    <loc>https://anw-sh.github.io/sgm_py/scripts/qc_reports.html</loc>
+    <lastmod>2026-11-06T14:56:40.253Z</lastmod>
+  </url>
+  <url>
+    <loc>https://anw-sh.github.io/sgm_py/scripts/kraken.html</loc>
+    <lastmod>2026-11-06T15:03:42.987Z</lastmod>
+  </url>
+  <url>
+    <loc>https://anw-sh.github.io/sgm_py/scripts/fastp.html</loc>
+    <lastmod>2026-11-06T15:03:07.715Z</lastmod>
+  </url>
+  <url>
+    <loc>https://anw-sh.github.io/sgm_py/run.html</loc>
+    <lastmod>2026-11-06T15:04:45.553Z</lastmod>
+  </url>
+  <url>
+    <loc>https://anw-sh.github.io/sgm_py/modules/taxonomy.html</loc>
+    <lastmod>2026-11-06T15:02:38.450Z</lastmod>
+  </url>
+  <url>
+    <loc>https://anw-sh.github.io/sgm_py/index.html</loc>
+    <lastmod>2026-11-06T15:24:21.796Z</lastmod>
+  </url>
+  <url>
+    <loc>https://anw-sh.github.io/sgm_py/modules/qc.html</loc>
+    <lastmod>2026-11-06T15:02:21.971Z</lastmod>
   </url>
   <url>
     <loc>https://anw-sh.github.io/sgm_py/profiles.html</loc>
-    <lastmod>2026-11-03T06:46:51.610Z</lastmod>
+    <lastmod>2026-11-03T14:11:06.359Z</lastmod>
   </url>
   <url>
-    <loc>https://anw-sh.github.io/sgm_py/workflow.html</loc>
-    <lastmod>2026-11-03T06:40:30.587Z</lastmod>
+    <loc>https://anw-sh.github.io/sgm_py/scripts/bbduk.html</loc>
+    <lastmod>2026-11-06T15:02:56.056Z</lastmod>
+  </url>
+  <url>
+    <loc>https://anw-sh.github.io/sgm_py/scripts/hostile.html</loc>
+    <lastmod>2026-11-06T15:03:22.048Z</lastmod>
+  </url>
+  <url>
+    <loc>https://anw-sh.github.io/sgm_py/scripts/mpa.html</loc>
+    <lastmod>2026-11-06T15:03:56.373Z</lastmod>
+  </url>
+  <url>
+    <loc>https://anw-sh.github.io/sgm_py/setup.html</loc>
+    <lastmod>2026-11-06T15:04:58.245Z</lastmod>
   </url>
 </urlset>

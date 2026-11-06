@@ -1,49 +1,56 @@
 [
   {
+    "objectID": "workflow.html",
+    "href": "workflow.html",
+    "title": "Notes",
+    "section": "",
+    "text": "How this repo was made… (Notes to Self)"
+  },
+  {
+    "objectID": "workflow.html#repo",
+    "href": "workflow.html#repo",
+    "title": "Notes",
+    "section": "Repo",
+    "text": "Repo\nA new public repository, sgm_py, was created on , including a basic README.md and LICENSE files.\nCloned to a local directory\ngh repo clone anw-sh/sgm_py\nMade new directories\ncd sgm_py\nmkdir -p src/sgm_py docs tests\n\nDocs\nGenerated a Quarto website with docs as the parent directory. Required qmd files were created, and published as  pages\ncd docs\nquarto publish gh-pages\nThe root of gh-pages branch was used as source for the Quarto site.\n\n\nScripts\nAdded the cleaned scripts of mga_p repo to src/sgm_py directory.\nCreated a virtual environment. Python version: 3.14.8\npython -m venv venv\nsource venv/bin/activate\nInstalled dependencies\n\n\nEnv: venv\n\npython -m pip install rich inflect\n\nEach script is being documented and saved as website pages.\nChanges were committed to the main branch.\n# In the sgm_py directory\ngit add .\ngit commit -m 'Add scripts'\ngit push origin main"
+  },
+  {
     "objectID": "index.html",
     "href": "index.html",
     "title": "Home",
     "section": "",
-    "text": "A modular pipeline to analyze shotgun metagenome reads."
+    "text": "A modular pipeline to analyze shotgun metagenome reads.",
+    "crumbs": [
+      "Home",
+      "SGMAP"
+    ]
   },
   {
     "objectID": "index.html#pipeline",
     "href": "index.html#pipeline",
     "title": "Home",
     "section": "Pipeline",
-    "text": "Pipeline"
+    "text": "Pipeline",
+    "crumbs": [
+      "Home",
+      "SGMAP"
+    ]
+  },
+  {
+    "objectID": "index.html#quickstart",
+    "href": "index.html#quickstart",
+    "title": "Home",
+    "section": "Quickstart",
+    "text": "Quickstart\nRequires…\n\na list of studies (studies_list.txt)\na list of samples per study (samples_list.txt)\na list of installed tools and databases (utility_paths.csv)\ncompressed reads (.gz format) in raw_reads directory\n\n…in the following structure\n.\n├── studies_list.txt\n├── utility_paths.csv\n├── Study1\n│   ├── raw_reads\n│   └── samples_list.txt\n├── Study2\n│   ├── raw_reads\n│   └── samples_list.txt\n└── Study3\n    ├── raw_reads\n    └── samples_list.txt\nRun all the available modules in a predefined order.\npython run_pipeline.py run all\nThis uses default values for all the options.\npython run_pipeline.py run --help\n\nusage: run_pipeline.py run [-h] [-b BASE_DIR] [-s SAMPLES] [-p PROJECTS] [-u UTILITY_PATHS] [-t THREADS] [-l [{1,2,3}]] [--resume] [-v] [--log_file LOG_FILE] [--profile {human_mag,human_taxonomy,other_mag,other_taxonomy}]\n                           [--keep_intermediate] [--tool {kraken,metaphlan}] [-r READS_DIR] [--confidence CONFIDENCE]\n                           MODULE [MODULE ...]\n\nRun the selected modules in this order: qc -&gt; taxonomy. Options of all modules are accepted.\n\npositional arguments:\n  MODULE                One or more of: qc, taxonomy, or all.\n\noptions:\n  -h, --help            show this help message and exit\n  -b, --base_dir BASE_DIR\n                        Main directory with all the data. (Default: Current directory)\n  -s, --samples SAMPLES\n                        List of sample IDs as text file, just the file name, not its path. (Default: samples_list.txt)\n  -p, --projects PROJECTS\n                        List of project names as text file. (Default: studies_list.txt)\n  -u, --utility_paths UTILITY_PATHS\n                        Envs or Paths for tools and DBs as a CSV file. (Default: utility_paths.csv)\n  -t, --threads THREADS\n                        Number of threads (Default: 1)\n  -l, --split_size [{1,2,3}]\n                        Number of sub_lists to run concurrently (Default: 1, no splitting).\n  --resume              Continue a previous run: skip finished samples, redo the rest. Without it, stop if results of a previous run exist.\n  -v, --verbose         Show debug messages.\n  --log_file LOG_FILE   Also write log messages to this file.\n  --profile {human_mag,human_taxonomy,other_mag,other_taxonomy}\n                        Sample type and goal. human_mag: BBDuk+fastp+Hostile; human_taxonomy: BBDuk+Hostile; other_mag: BBDuk+fastp; other_taxonomy: BBDuk only. (Default: human_mag)\n  --keep_intermediate   Keep BBDuk/fastp reads after Hostile succeeded (default: delete them to save space).\n  --tool {kraken,metaphlan}\n                        kraken: Kraken2+Bracken; metaphlan: MetaPhlAn. (Default: metaphlan)\n  -r, --reads_dir READS_DIR\n                        Input directory name containing reads. (Default: filtered_reads)\n  --confidence CONFIDENCE\n                        Kraken2 confidence score threshold, from 0 to 1. (Default: 0.0)\n\n\n\n\n\n\nWarning--reads_dir\n\n\n\n\n\nIssue: Default value of -r is being displayed from the Taxonomy module, but the actual default is the raw_reads directory. It is due to the reuse of -r option in multiple scripts (will be fixed). Pipeline is working as expected.\n\n\n\nCurrently available modules and scripts…\npython run_pipeline.py --help\n\nusage: run_pipeline.py [-h] COMMAND ...\n\nMain script: run several modules in order, one module, or a single step.\n\nrun_pipeline.py run all -b all_data -t 8            # every module, in MODULES order\nrun_pipeline.py run qc taxonomy --profile human_taxonomy --tool kraken\nrun_pipeline.py qc --profile other_mag              # one module\nrun_pipeline.py bbduk -b all_data                   # one step\nrun_pipeline.py COMMAND -h                          # options of a command\n\npositional arguments:\n  COMMAND\n    run         Run modules in order: qc -&gt; taxonomy (or 'all').\n    qc          Perform QC on shotgun reads. Runs FastQC, MultiQC and BBDuk, plus fastp and Hostile depending on the profile.\n    taxonomy    Taxonomy module: profile filtered reads with Kraken2+Bracken or MetaPhlAn and merge the profiles of all studies...\n    qc_reports  Generate QC reports. Runs FastQC and MultiQC. Expects the name of the directory with reads, by default looks for raw_reads directory\n    bbduk       Trimming SE or PE reads with BBDuk...\n    fastp       Reduce duplicate reads from SE or PE reads with fastp\n    hostile     Remove host reads from SE or PE short reads with Hostile\n    kraken      Classify reads with Kraken2 and Bracken, convert to MPA format and merge the MPA files of all studies\n    metaphlan   Profile read-files with MetaPhlAn (read-stats and relative-abundance profiles) and merge the profiles of all studies.\n\noptions:\n  -h, --help    show this help message and exit\nCheck Run page for more details",
+    "crumbs": [
+      "Home",
+      "SGMAP"
+    ]
   },
   {
     "objectID": "profiles.html",
     "href": "profiles.html",
     "title": "Profiles",
     "section": "",
-    "text": "Select between the following profiles to choose the type of analysis",
-    "crumbs": [
-      "Home",
-      "Profiles"
-    ]
-  },
-  {
-    "objectID": "workflow.html",
-    "href": "workflow.html",
-    "title": "Notes",
-    "section": "",
-    "text": "How this repo was made… (Notes to Self)",
-    "crumbs": [
-      "Home",
-      "Notes"
-    ]
-  },
-  {
-    "objectID": "workflow.html#new-repo",
-    "href": "workflow.html#new-repo",
-    "title": "Notes",
-    "section": "New repo",
-    "text": "New repo\nA new public repository, sgm_py, was created on , including a basic README.md and LICENSE files.\nCloned to a local directory\ngh repo clone anw-sh/sgm_py\nMade new directories\ncd sgm_py\nmkdir -p src/sgm_py docs tests\nGenerated a Quarto website with docs as the parent directory. Required qmd files were created, and published as  pages\ncd docs\nquarto publish gh-pages\nThe root of gh-pages branch was used as source for the documentation site.\nAdded the cleaned scripts of mga_p repo to src/sgm_py directory.\nEach script is being documented and saved as website pages.\nChanges were committed to the main branch.\n# In the sgm_py directory\ngit add .\ngit commit -m 'Add scripts'\ngit push origin main",
-    "crumbs": [
-      "Home",
-      "Notes"
-    ]
+    "text": "Select between the following profiles to choose the type of analysis"
   }
 ]
