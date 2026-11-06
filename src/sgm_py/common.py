@@ -6,15 +6,18 @@ from __future__ import annotations
 import argparse
 import concurrent.futures
 import contextlib
+import filecmp
 import json
 import logging
 import os
 import re
+import shutil
 import socket
 import subprocess
+import threading
 import time
-
-from collections.abc import Callable, Iterable, Sequence
+from collections.abc import Callable, Iterable, Mapping, Sequence
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Protocol
@@ -69,6 +72,9 @@ READ_PATTERNS: tuple[str, ...] = (
     "{s}_S*_L*_R1_*.*q.gz",
     "{s}_S*_L*_R2_*.*q.gz",
 )
+
+# Set on Ctrl+C / SIGTERM (or cancel button in WebUI): workers stop before starting the next sample
+STOP = threading.Event()
 
 # Terminal output lines classification (for run_command)
 ERROR_RE = re.compile(r"\b(errors?|exceptions?|fatal|traceback|failed|failure)\b", re.IGNORECASE)
@@ -163,16 +169,6 @@ class NullStatus:
     def update(self, status: str = "", *, spinner: str | None = None, spinner_style: str | None = None) -> None:
         return None
 
-# Legacy Progress() object. Remove after cleaning up all scripts.
-progress = Progress(
-    SpinnerColumn(),
-    TextColumn("[progress.description]{task.description}"),
-    BarColumn(),
-    TextColumn("{task.completed}/{task.total}"),
-    TimeElapsedColumn(),
-    TimeRemainingColumn(),
-    transient=False,
-)
 
 # -----------------------------------------------
 # CLI helpers
@@ -257,11 +253,15 @@ def get_unique_items(in_list: Iterable[str], pattern: str | None = None) -> list
 # -----------------------------------------------
 DONE_DIR = ".done"
 
-def is_done(out_dir: Path, sample: str, outputs: Sequence[Path]) -> bool:
-    """True if the sample's stage finished: indicates completion marker present and all outputs exist"""
-    return (out_dir / DONE_DIR / f"{sample}.json").is_file() and all(out.exists() for out in outputs)
+def _marker(out_dir: Path, sample: str, suffix: str) -> Path:
+    """Marker file of a sample; suffix separates several steps that share one out_dir"""
+    return out_dir / DONE_DIR / (f"{sample}.{suffix}.json" if suffix else f"{sample}.json")
 
-def mark_done(out_dir: Path, sample: str, stage: str, command: str) -> None:
+def is_done(out_dir: Path, sample: str, outputs: Sequence[Path], *, suffix: str = "") -> bool:
+    """True if the sample's stage finished: indicates completion marker present and all outputs exist"""
+    return _marker(out_dir, sample, suffix).is_file() and all(out.exists() for out in outputs)
+
+def mark_done(out_dir: Path, sample: str, stage: str, command: str, *, suffix: str = "") -> None:
     """Record that a stage finished for the sample (provenance)"""
     done_dir = out_dir / DONE_DIR
     done_dir.mkdir(parents=True, exist_ok=True)
@@ -272,13 +272,14 @@ def mark_done(out_dir: Path, sample: str, stage: str, command: str) -> None:
         "finished": datetime.now().astimezone().isoformat(timespec="seconds"),
         "command": command
     }
-    tmp = done_dir / f"{sample}.tmp"
+    marker = _marker(out_dir, sample, suffix)
+    tmp = marker.with_name(f".{marker.name}.tmp")
     tmp.write_text(json.dumps(record, indent=2), encoding="utf-8")
-    tmp.replace(done_dir / f"{sample}.json")
+    tmp.replace(marker)
 
-def prepare_redo(out_dir: Path, sample: str, outputs: Sequence[Path]) -> None:
+def prepare_redo(out_dir: Path, sample: str, outputs: Sequence[Path], *, suffix: str = "") -> None:
     """"Before (re)running a stage, remove partial outputs"""
-    (out_dir / DONE_DIR / f"{sample}.json").unlink(missing_ok=True)
+    _marker(out_dir, sample, suffix).unlink(missing_ok=True)
     leftovers = [out for out in outputs if out.exists()]
     if leftovers:
         logger.warning("%s No completion marker for %s (partial or old output): redoing", EMOJI_WARNING, escape(sample))
@@ -318,8 +319,100 @@ def link_filtered_reads(outputs: Sequence[Path], dest_dir: Path, sample: str) ->
     return links
 
 # -----------------------------------------------
+# System resources (Linux)
+# -----------------------------------------------
+@dataclass(frozen=True)
+class SystemInfo:
+    """Machine resources"""
+
+    hostname: str
+    cpus: int
+    ram_total_gb: float
+    ram_available_gb: float
+    ram_limit_gb: float | None
+
+    @property
+    def usable_ram_gb(self) -> float:
+        """"Available RAM the current process can use"""
+        if self.ram_limit_gb is None:
+            return self.ram_available_gb
+        return min(self.ram_available_gb, self.ram_limit_gb)
+
+def _meminfo_gb(field: str, path: Path = Path("/proc/meminfo")) -> float:
+    try:
+        for line in path.read_text().splitlines():
+            if line.startswith(f"{field}:"):
+                return int(line.split()[1]) / 1024**2
+    except (OSError, ValueError, IndexError):
+        pass
+    return 0.0
+
+CGROUP_MEMORY_FILES = ("/sys/fs/cgroup/memory.max", "/sys/fs/cgroup/memory/memory.limit_in_bytes")
+
+def _memory_limit_gb(env: Mapping[str, str] = os.environ, cgroup_files: Sequence[str] = CGROUP_MEMORY_FILES) -> float | None:
+    """A memory limit imposed on this process, or None (the usual case on a workstation).
+    Smallest of: SLURM_MEM_PER_NODE (MB, only inside a SLURM job) and the cgroup memory limits
+    (containers, systemd, SLURM). Without any of them nothing is capped.
+    """
+    limits: list[float] = []
+    slurm = env.get("SLURM_MEM_PER_NODE", "")
+    if slurm.isdigit():
+        limits.append(int(slurm) / 1024)
+    for path in cgroup_files:
+        try:
+            raw = Path(path).read_text().strip()
+        except OSError:
+            continue
+        if raw.isdigit() and int(raw) < 2**60:  # "max" / huge numbers mean unlimited
+            limits.append(int(raw) / 1024**3)
+    return min(limits) if limits else None
+
+def _psutil_ram_gb() -> tuple[float, float]:
+    """(total, available) GiB from psutil, for systems without /proc/meminfo (macOS, Windows). (0, 0) if unavailable."""
+    try:
+        import psutil
+    except ImportError:
+        return 0.0, 0.0
+    memory = psutil.virtual_memory()
+    return memory.total / 1024**3, memory.available / 1024**3
+
+def get_system_info() -> SystemInfo:
+    """Host name, usable cores (respects CPU affinity, e.g. a SLURM allocation) and RAM.
+    
+    Works on any Linux machine (workstation or HPC node): RAM comes from /proc/meminfo, where
+    "available" is what can be used without swapping (free + reclaimable cache). SLURM and cgroup
+    limits only apply when present. Other systems need psutil; without it RAM is reported as 0.
+    """
+    affinity = getattr(os, "sched_getaffinity", None)
+    cpus = len(affinity(0)) if affinity is not None else (os.cpu_count() or 1)
+    total, available = _meminfo_gb('MemTotal'), _meminfo_gb('MemAvailable')
+    if total <= 0 or available <= 0:
+        total, available = _psutil_ram_gb()
+    return SystemInfo(sys_name, cpus, total, available, _memory_limit_gb())
+
+def print_system_info(info: SystemInfo) -> None:
+    """Panel with machine's resources"""
+    limit = f", limit [bold]{info.ram_limit_gb:.0f}[/] GB" if info.ram_limit_gb is not None else ""
+    console.print(
+        Panel.fit(
+            f"[dim]{EMOJI_SPARKLE} Host[/] [bold]{escape(info.hostname)}[/]: [bold]{info.cpus}[/] cores, "
+            f"[bold]{info.ram_total_gb:.0f}[/] GB RAM ([bold]{info.usable_ram_gb:.0f}[/] GB free{limit})",
+            title="System", border_style="dim cyan"
+        ),
+        style="italic",
+    )
+
+# -----------------------------------------------
 # Running commands
 # -----------------------------------------------
+def expand_path(value: str) -> str:
+    """Expand ~ and $VARS in a utility_paths.csv value, as the shell would.
+ 
+    Needed because values are shell-quoted into commands, and quoting turns off the shell's
+    own expansion ('~/db/idx' would be taken literally). Plain names are returned unchanged.
+    """
+    return os.path.expandvars(os.path.expanduser(value))
+
 def env_command(env: str, command: str) -> str:
     """Wrap the command"""
     return f"{ENV_RUNNER} {env} {command}"
@@ -345,7 +438,12 @@ def run_command(
     Each line is logged to cmd_logger, for file/WebUI handlers.
     `check` raises CalledProcessError on a non-zero exit.
     """
+    if STOP.is_set(): # safety net: a stage loop that forgot to check STOP must not start new tools
+        logger.warning("%s Stop requested, not starting: %s", EMOJI_WARNING, escape(desc or command))
+        return 130
+    
     console.print(Panel(f"[yellow dim]$ {escape(command)}[/yellow dim]", border_style="dim", title=desc, expand=False))
+    cmd_logger.info("$ %s", command)
     counts = {logging.WARNING: 0, logging.ERROR: 0}
     start = time.monotonic()
 
@@ -408,20 +506,108 @@ def run_concurrently(
 
     logger.info("%s Initiating %d processes...", EMOJI_PROCESS, split_size)
     failures = 0
-    with concurrent.futures.ThreadPoolExecutor(max_workers=split_size) as executor:
+    executor = concurrent.futures.ThreadPoolExecutor(max_workers=split_size)
+    try:
         futures = []
         for i, sub_list in enumerate(sample_lists):
-            if i > 0:
-                time.sleep(stagger)
+            if i > 0 and STOP.wait(stagger):  # slight delay to stagger starts; wakes up on a stop request
+                break
             futures.append(executor.submit(run_func, sub_list, status_subs[i], *args))
         for future in concurrent.futures.as_completed(futures):
             try:
                 future.result()
-            except Exception:
+            except Exception:  # noqa: BLE001 - worker boundary: report here, decide below
                 failures += 1
                 logger.exception("%s Error in concurrent execution", EMOJI_CROSS)
+    except KeyboardInterrupt:
+        # Ctrl+C also reached the running tools; tell the workers not to start the next sample
+        STOP.set()
+        logger.warning("%s Interrupted: waiting for running tools to stop...", EMOJI_WARNING)
+        raise
+    finally:
+        executor.shutdown(wait=True, cancel_futures=True)
     if failures and raise_on_error:
         raise RuntimeError(f"{failures} of {split_size} worker(s) failed")
+
+# -----------------------------------------------
+# Per-sample steps with resume markers, 
+# and merged tables (Kraken2, MetaPhlAn)
+# -----------------------------------------------
+def sample_tag(study: str, sample: str) -> str:
+    return f"[blue]{escape(study)}[/blue] {EMOJI_PLAY} [magenta]{escape(sample)}[/magenta]"
+
+def run_step(out_dir: Path, sample: str, step: str, outputs: list[Path], command: str, tag: str) -> bool:
+    """One step of one sample with resume markers. True if succeeded or was already done"""
+    if is_done(out_dir, sample, outputs, suffix=step):
+        logger.info("%s %s already done for %s. Skipping...", EMOJI_CHECK, step, tag)
+        return True
+    prepare_redo(out_dir, sample, outputs, suffix=step)
+    logger.info("%s Running %s on %s...", EMOJI_PROCESS, step, tag)
+    returncode = run_command(command, desc=f"Running {step} on {sample}")
+    if returncode != 0 or not all(out.exists() for out in outputs):
+        for out in outputs:
+            out.unlink(missing_ok=True)
+        logger.error("%s %s failed for %s (exit code %d, or expected output missing)", EMOJI_CROSS, step, tag, returncode)
+        return False
+    mark_done(out_dir, sample, step, command, suffix=step)
+    return True
+
+def run_step_for(
+    sub_list: list[str],
+    status_sub: StatusLike,
+    study: str,
+    studies: list[str],
+    out_dir: Path,
+    step: str,
+    verb: str,
+    plan: Callable[[str], tuple[list[Path], str] | None],
+) -> None:
+    """Run one step for every sample. plan(sample) -> (outputs, command), or None if it cannot be planned
+    (it logs why). Raises RuntimeError at the end if any sample failed."""
+    st_count = f"{studies.index(study) + 1}/{len(studies)}"
+    failed: list[str] = []
+    for i, sample in enumerate(sub_list, start = 1):
+        if STOP.is_set():
+            break
+        tag = sample_tag(study, sample)
+        status_sub.update(f"[i][dim]{verb}[/dim] {tag}[dim]: ({i}/{len(sub_list)}) | ({st_count}) [/dim][/i]", spinner="point", spinner_style="magenta")
+        planned = plan(sample)
+        if planned is None or not run_step(out_dir, sample, step, planned[0], planned[1], tag):
+            failed.append(sample)
+        status_sub.update(f"[i][dim]{step} done: ({i}/{len(sub_list)}) | ({st_count}), waiting for other processes [/dim][/i]", spinner="toggle9", spinner_style="blue")
+    if failed:
+        raise RuntimeError(f"{step} failed for {len(failed)} sample(s): {', '.join(failed)}")
+
+def collect_files(sources: Iterable[Path], dest_dir: Path) -> int:
+    """Copy files into dest_dir. Returns the number copied"""
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    copied = 0
+    for src in sources:
+        dst = dest_dir / src.name
+        if dst.exists():
+            if filecmp.cmp(src, dst, shallow=False):
+                continue # unchanged: keep its timestamp
+            logger.warning("%s Overwriting %s: it differs (same sample ID in another study, or a re-run?)", EMOJI_WARNING, escape(dst.name))
+        shutil.copy(src, dst)
+        copied += 1
+    return copied
+
+def merge_files(files: Sequence[Path], merged: Path, command: str, what: str) -> bool:
+    """Run a merge command unless merged is newer than every input. Removes a partial table on failure."""
+    if not files:
+        logger.error("%s No %s to merge", EMOJI_CROSS, what)
+        return False
+    if merged.is_file() and merged.stat().st_mtime >= max(f.stat().st_mtime for f in files):
+        logger.info("%s %s is up to date. Skipping...", EMOJI_CHECK, merged.name)
+        return True
+    returncode = run_command(command, desc=f"Merging {len(files)} {what}")
+    if returncode != 0 or not merged.is_file():
+        merged.unlink(missing_ok=True)
+        logger.error("%s Merging the %s failed (exit code %d, or no output)", EMOJI_CROSS, what, returncode)
+        return False
+    logger.info("%s Merged %d %s into %s", EMOJI_CHECK, len(files), what, escape(str(merged)))
+    return True
+
 
 if __name__ == "__main__":
     setup_logging()

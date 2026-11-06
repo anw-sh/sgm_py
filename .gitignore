@@ -1,3 +1,4 @@
 docs/_site/
 docs/.quarto/
 src/sgm_py/__pycache__/
+make_*

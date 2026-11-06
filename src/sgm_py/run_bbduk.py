@@ -89,7 +89,7 @@ def trim_reads(
         else:
             common.prepare_redo(bb_out, sample, outputs)
             logger.info("%s Processing %s with BBDuk (%s)...", common.EMOJI_PROCESS, st_sample, "PE" if len(reads) == 2 else "SE")
-            command = common.env_command(utility_paths["BBDuk"], build_bbduk_command(reads, outputs, utility_paths["bb_adapters"], threads))
+            command = common.env_command(utility_paths["BBDuk"], build_bbduk_command(reads, outputs, common.expand_path(utility_paths["bb_adapters"]), threads))
             returncode = common.run_command(command, desc=f"Trimming {sample} reads", log_file=bb_out / f"{sample}.log")
             if returncode != 0:
                 for out in outputs:
@@ -125,13 +125,22 @@ def process_study(
         logger.info("%s Collected %d BBDUk results lines for %s", common.EMOJI_SPARKLE, n_results, escape(study))
     return True
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description="Trimming SE or PE reads with BBDuk...")
-    common.add_common_args(parser)
+
+DESCRIPTION = "Trimming SE or PE reads with BBDuk..."
+
+def add_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("-r", "--reads_dir", default="raw_reads", help="Input directory name containing reads. (Default: raw_reads)")
     parser.add_argument("-o", "--bbduk_out", default="bb_out", help="Output directory name for BBDuk filtered reads. (Default: bb_out)")
 
-    return study_runner.run_studies(parser.parse_args(), "Trimming reads with BBDuk...", "BBDuk", REQUIRED_KEYS, process_study)
+def run(args: argparse.Namespace) -> int:
+    return study_runner.run_studies(args, "Trimming reads with BBDuk...", "BBDuk", REQUIRED_KEYS, process_study)
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=DESCRIPTION)
+    common.add_common_args(parser)
+    add_args(parser)
+    return run(parser.parse_args(argv))
+
 
 if __name__ == "__main__":
     sys.exit(main())

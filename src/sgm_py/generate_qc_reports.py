@@ -119,14 +119,23 @@ def process_study(
     common.set_waiting(status_subs)
     return qc_reports(study_dir / args.reads_dir, study_dir / args.qc_dir, study_dir / args.mqc_dir, status_subs[0], study, studies, samples, args.threads, args.split_size, utility_paths)
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description="Generate QC reports. Runs FastQC and MultiQC. Expects the name of the directory with reads, by default looks for raw_reads directory...")
-    common.add_common_args(parser)
+
+DESCRIPTION = "Generate QC reports. Runs FastQC and MultiQC. Expects the name of the directory with reads, by default looks for raw_reads directory"
+
+def add_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("-r", "--reads_dir", default="raw_reads", help="Input directory name containing reads. (Default: raw_reads)")
     parser.add_argument("-q", "--qc_dir", default="raw_qc", help="Output directory name for QC reports. (Default: raw_qc)")
     parser.add_argument("-m", "--mqc_dir", default="raw_mqc", help="Output directory name for MultiQC report. (Default: raw_mqc)")
-    
-    return study_runner.run_studies(parser.parse_args(), "Generating QC reports...", "QC reports", REQUIRED_TOOLS, process_study)
+
+def run(args: argparse.Namespace) -> int:
+    return study_runner.run_studies(args, "Generating QC reports...", "QC reports", REQUIRED_TOOLS, process_study)
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=DESCRIPTION)
+    common.add_common_args(parser)
+    add_args(parser)
+    return run(parser.parse_args(argv))
+
 
 if __name__ == "__main__":
     sys.exit(main())
