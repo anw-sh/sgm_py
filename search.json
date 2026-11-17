@@ -1,19 +1,5 @@
 [
   {
-    "objectID": "workflow.html",
-    "href": "workflow.html",
-    "title": "Notes",
-    "section": "",
-    "text": "How this repo was made… (Notes to Self)"
-  },
-  {
-    "objectID": "workflow.html#repo",
-    "href": "workflow.html#repo",
-    "title": "Notes",
-    "section": "Repo",
-    "text": "Repo\nA new public repository, sgm_py, was created on , including a basic README.md and LICENSE files.\nCloned to a local directory\ngh repo clone anw-sh/sgm_py\nMade new directories\ncd sgm_py\nmkdir -p src/sgm_py docs tests\n\nDocs\nGenerated a Quarto website with docs as the parent directory. Required qmd files were created, and published as  pages\ncd docs\nquarto publish gh-pages\nThe root of gh-pages branch was used as source for the Quarto site.\n\n\nScripts\nAdded the cleaned scripts of mga_p repo to src/sgm_py directory.\nCreated a virtual environment. Python version: 3.14.8\npython -m venv venv\nsource venv/bin/activate\nInstalled dependencies\n\n\nEnv: venv\n\npython -m pip install rich inflect\n\nEach script is being documented and saved as website pages.\nChanges were committed to the main branch.\n# In the sgm_py directory\ngit add .\ngit commit -m 'Add scripts'\ngit push origin main"
-  },
-  {
     "objectID": "index.html",
     "href": "index.html",
     "title": "Home",
@@ -45,6 +31,20 @@
       "Home",
       "SGMAP"
     ]
+  },
+  {
+    "objectID": "workflow.html",
+    "href": "workflow.html",
+    "title": "Notes",
+    "section": "",
+    "text": "How this repo was made… (Notes to Self)"
+  },
+  {
+    "objectID": "workflow.html#repo",
+    "href": "workflow.html#repo",
+    "title": "Notes",
+    "section": "Repo",
+    "text": "Repo\nA new public repository, sgm_py, was created on , including a basic README.md and LICENSE files.\nCloned to a local directory\ngh repo clone anw-sh/sgm_py\nMade new directories\ncd sgm_py\nmkdir -p src/sgm_py docs tests\n\nDocs\nGenerated a Quarto website with docs as the parent directory. Required qmd files were created, and published as  pages\ncd docs\nquarto publish gh-pages\nThe root of gh-pages branch was used as source for the Quarto site.\n\n\nScripts\nAdded the cleaned scripts of mga_p repo to src/sgm_py directory.\nCreated a virtual environment. Python version: 3.14.8\npython -m venv venv\nsource venv/bin/activate\nInstalled dependencies\n\n\nEnv: venv\n\npython -m pip install rich inflect\n\nEach script is being documented and saved as website pages.\nChanges were committed to the main branch.\n# In the sgm_py directory\ngit add .\ngit commit -m 'Add scripts'\ngit push origin main"
   },
   {
     "objectID": "profiles.html",
