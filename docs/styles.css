@@ -36,7 +36,6 @@ body.quarto-dark {
 body {
   font-family: var(--pl-font-body);
   line-height: 1.65;
-  font-size: 0.9rem;
   color: #495057;
 }
 

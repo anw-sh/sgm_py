@@ -67,7 +67,7 @@ format:
   html:
     theme: journal
     css: styles.css
-    fontsize: 0.9em
+    fontsize: 0.95em
     title-prefix: "SGMAP"
     code-copy: true
     syntax-highlighting: ayu
