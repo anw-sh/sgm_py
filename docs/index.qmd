@@ -15,7 +15,7 @@ A modular pipeline to analyze shotgun metagenome reads.
 Code cleanup is underway, and adding documentation...  
 
 QC module: Tested successfully on Illumina paired-end data  
-Taxonomy module: Currently testing...
+Taxonomy module: Tested successfully on Illumina paired-end data
 
 :::
 
@@ -60,8 +60,8 @@ This uses default values for all the options.
 ```bash
 python run_pipeline.py run --help
 
-usage: run_pipeline.py run [-h] [-b BASE_DIR] [-s SAMPLES] [-p PROJECTS] [-u UTILITY_PATHS] [-t THREADS] [-l [{1,2,3}]] [--resume] [-v] [--log_file LOG_FILE] [--profile {human_mag,human_taxonomy,other_mag,other_taxonomy}]
-                           [--keep_intermediate] [--tool {kraken,metaphlan}] [-r READS_DIR] [--confidence CONFIDENCE]
+usage: run_pipeline.py run [-h] [-b BASE_DIR] [-s SAMPLES] [-p PROJECTS] [-u UTILITY_PATHS] [-t THREADS] [-l [{1,2,3}]] [--resume] [-v] [--log_file LOG_FILE] [--qc_sg_in QC_SG_IN]
+                           [--profile {human_mag,human_taxonomy,other_mag,other_taxonomy}] [--keep_intermediate] [--tool {kraken,metaphlan}] [--kraken_in KRAKEN_IN] [--confidence CONFIDENCE] [--mpa_in MPA_IN]
                            MODULE [MODULE ...]
 
 Run the selected modules in this order: qc -> taxonomy. Options of all modules are accepted.
@@ -86,20 +86,27 @@ options:
   --resume              Continue a previous run: skip finished samples, redo the rest. Without it, stop if results of a previous run exist.
   -v, --verbose         Show debug messages.
   --log_file LOG_FILE   Also write log messages to this file.
+
+QC module:
+  --qc_sg_in QC_SG_IN   Input directory with the raw reads. (Default: raw_reads)
   --profile {human_mag,human_taxonomy,other_mag,other_taxonomy}
                         Sample type and goal. human_mag: BBDuk+fastp+Hostile; human_taxonomy: BBDuk+Hostile; other_mag: BBDuk+fastp; other_taxonomy: BBDuk only. (Default: human_mag)
   --keep_intermediate   Keep BBDuk/fastp reads after Hostile succeeded (default: delete them to save space).
+
+Taxonomy module:
   --tool {kraken,metaphlan}
                         kraken: Kraken2+Bracken; metaphlan: MetaPhlAn. (Default: metaphlan)
-  -r, --reads_dir READS_DIR
-                        Input directory name containing reads. (Default: filtered_reads)
+
+Kraken2 options (used with --tool kraken):
+  --kraken_in KRAKEN_IN
+                        Input directory with reads for Kraken2. (Default: filtered_reads)
   --confidence CONFIDENCE
                         Kraken2 confidence score threshold, from 0 to 1. (Default: 0.0)
+
+MetaPhlAn options (used with --tool metaphlan):
+  --mpa_in MPA_IN       Input directory with reads for MetaPhlAn. (Default: filtered_reads)
 ```
 
-:::{.callout-warning icon="false" title="`--reads_dir`" collapse="true"}
-[Issue:]{.small} Default value of `-r` is being displayed from the Taxonomy module, but the actual default is the `raw_reads` directory. It is due to the reuse of `-r` option in multiple scripts (will be fixed). Pipeline is working as expected.
-:::
 
 
 Currently available modules and scripts...

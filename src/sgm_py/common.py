@@ -192,6 +192,11 @@ def set_waiting(status_subs: Sequence[StatusLike], message: str = "Waiting for t
     for status_sub in status_subs:
         status_sub.update(f"[dim]{message}[/]")
 
+# An ArgumentParser or one of its argument groups: both have add_argument() and add_argument_group().
+# Lets a script put its options under a heading in --help (see run_taxonomy.add_args).
+ArgParser = argparse._ActionsContainer
+
+
 def add_common_args(parser: argparse.ArgumentParser) -> None:
     """Arguments shared by all scripts"""
     parser.add_argument("-b", "--base_dir", default="./", help="Main directory with all the data. (Default: Current directory)")

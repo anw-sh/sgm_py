@@ -192,7 +192,7 @@ def process_study(
     for status_sub in status_subs[workers:]:
         status_sub.update("[dim]Not used: limited by free RAM[/dim]")
     common.run_concurrently(
-        classify_reads, workers, sample_lists, status_subs[:workers], study, studies, study_dir / args.reads_dir, kraken_out, 
+        classify_reads, workers, sample_lists, status_subs[:workers], study, studies, study_dir / args.kraken_in, kraken_out,
         utility_paths, args.kraken_db, args.threads, args.kraken_mapping, args.confidence,
     )
     common.set_waiting(status_subs, "Running Bracken and converting to MPA format...")
@@ -216,13 +216,10 @@ def merge_mpa(args: argparse.Namespace, base: Path, studies: list[str], utility_
 
 DESCRIPTION = "Classify reads with Kraken2 and Bracken, convert to MPA format and merge the MPA files of all studies"
 
-def add_tool_args(parser: argparse.ArgumentParser) -> None:
-    """Kraken2-only options (also offered by run_taxonomy module)"""
+def add_args(parser: common.ArgParser) -> None:
+    parser.add_argument("--kraken_in", default="filtered_reads", help="Input directory with reads for Kraken2. (Default: filtered_reads)")
     parser.add_argument("--confidence", type=confidence_value, default=0.0, help="Kraken2 confidence score threshold, from 0 to 1. (Default: 0.0)")
 
-def add_args(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument("-r", "--reads_dir", default="filtered_reads", help="Input directory name containing reads. (Default: filtered_reads)")
-    add_tool_args(parser)
 
 def run(args: argparse.Namespace) -> int:
     return study_runner.run_studies(args, "Classifying reads with Kraken2 suite", "Kraken2", REQUIRED_KEYS, process_study, setup=setup, finish_base=merge_mpa)

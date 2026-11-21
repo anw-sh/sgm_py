@@ -124,7 +124,7 @@ def process_study(
     out_dir.mkdir(parents=True, exist_ok=True)
 
     sample_lists = common.get_split_size(args.split_size, samples)
-    common.run_concurrently(profile_abs, args.split_size, sample_lists, status_subs, study, studies, study_dir / args.reads_dir, out_dir, utility_paths, args.mpa_db, args.threads)
+    common.run_concurrently(profile_abs, args.split_size, sample_lists, status_subs, study, studies, study_dir / args.mpa_in, out_dir, utility_paths, args.mpa_db, args.threads)
     common.set_waiting(status_subs, "Making relative abundance profiles...")
     profile_rel(samples, status_subs[0], study, studies, out_dir, utility_paths, args.mpa_db, args.threads)
 
@@ -149,8 +149,8 @@ def merge_profiles(args: argparse.Namespace, base: Path, studies: list[str], uti
 
 DESCRIPTION = "Profile read-files with MetaPhlAn (read-stats and relative-abundance profiles) and merge the profiles of all studies."
 
-def add_args(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument("-r", "--reads_dir", default="filtered_reads", help="Input directory name containing reads. (Default: filtered_reads)")
+def add_args(parser: common.ArgParser) -> None:
+    parser.add_argument("--mpa_in", default="filtered_reads", help="Input directory with reads for MetaPhlAn. (Default: filtered_reads)")
 
 def run(args: argparse.Namespace) -> int:
     return study_runner.run_studies(args, "Profiling reads with MetaPhlAn...", "MetaPhlAn", REQUIRED_KEYS, process_study, setup=setup, finish_base=merge_profiles)

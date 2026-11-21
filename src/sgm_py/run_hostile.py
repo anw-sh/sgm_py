@@ -115,7 +115,7 @@ def process_study(
     utility_paths: dict[str, str],
     status_subs: Sequence[common.StatusLike],
 ) -> bool:
-    in_dir = study_dir / args.reads_dir
+    in_dir = study_dir / args.hostile_in
     hostile_out = study_dir / args.hostile_out
     if not common.resume_allowed(args, [hostile_out], study):
         return False
@@ -128,8 +128,8 @@ def process_study(
 DESCRIPTION = "Remove host reads from SE or PE short reads with Hostile"
 
 def add_args(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument("-r", "--reads_dir", default="fp_out", help="Input directory name containing reads. (Default: fp_out)")
-    parser.add_argument("-o", "--hostile_out", default="hostile_out", help="Output directory name for host-removed reads. (Default: hostile_out)")
+    parser.add_argument("--hostile_in", default="fp_out", help="Input directory with reads for Hostile. (Default: fp_out)")
+    parser.add_argument("--hostile_out", default="hostile_out", help="Output directory name for host-removed reads. (Default: hostile_out)")
     parser.add_argument("--rm_input", action="store_true", help="Delete each sample's input reads once its hostile output exists")
 
 

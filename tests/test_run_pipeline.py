@@ -43,16 +43,30 @@ def test_run_accepts_options_of_every_module(calls: list[str], monkeypatch: pyte
 
 def test_single_step_gets_its_own_options(monkeypatch: pytest.MonkeyPatch) -> None:
     seen: list[tuple[str, str]] = []
-    monkeypatch.setattr(run_bbduk, "run", lambda args: seen.append((args.reads_dir, args.bbduk_out)) or 0)
-    assert rp.main(["bbduk", "-o", "trimmed"]) == 0
+    monkeypatch.setattr(run_bbduk, "run", lambda args: seen.append((args.bbduk_in, args.bbduk_out)) or 0)
+    assert rp.main(["bbduk", "--bbduk_out", "trimmed"]) == 0
     assert seen == [("raw_reads", "trimmed")]  # step defaults, not the taxonomy ones
+
+
+def test_run_help_names_each_input_directory_by_its_tool(capsys: pytest.CaptureFixture[str]) -> None:
+    """Regression: one shared -r/--reads_dir showed the taxonomy default (filtered_reads) for the whole chain."""
+    with pytest.raises(SystemExit):
+        rp.main(["run", "-h"])
+    text = capsys.readouterr().out
+    assert "--reads_dir" not in text and "-r " not in text
+    assert "--kraken_in" in text and "--mpa_in" in text and "--qc_sg_in" in text
+    # options of each module and tool under their own heading
+    for heading in ("QC module:", "Taxonomy module:", "Kraken2 options (used with --tool kraken):", "MetaPhlAn options (used with --tool metaphlan):"):
+        assert heading in text
 
 
 @pytest.mark.parametrize("command", ["run", *rp.MODULES, *rp.STEPS])
 def test_every_command_has_help(command: str, capsys: pytest.CaptureFixture[str]) -> None:
     with pytest.raises(SystemExit) as excinfo:
         rp.main([command, "-h"])
-    assert excinfo.value.code == 0 and "--base_dir" in capsys.readouterr().out
+    text = capsys.readouterr().out
+    assert excinfo.value.code == 0 and "--base_dir" in text
+    assert "--reads_dir" not in text  # input directories are named per tool (--bbduk_in, --kraken_in, ...)
 
 
 def test_unknown_module_and_missing_command_are_rejected() -> None:

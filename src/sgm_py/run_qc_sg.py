@@ -38,14 +38,14 @@ def required_keys(stages: frozenset[str]) -> list[str]:
 FILTERED_READS_DIR = "filtered_reads"    # Final reads of each profile, as symlinks to corresponding final stage
 STAGE_DIRS = ("bb_out", "fp_out", "hostile_out")
 
-def study_dirs(study_dir: Path, stages: frozenset[str]) -> dict[str, Path]:
-    """Directories used by the enabled stages"""
-    names = ["raw_reads", "raw_qc", "raw_mqc", "bb_out", "bb_qc", "bb_mqc", FILTERED_READS_DIR]
+def study_dirs(study_dir: Path, stages: frozenset[str], raw_dir: str = "raw_reads") -> dict[str, Path]:
+    """Directories used by the enabled stages. The "raw_reads" key is the input directory (--qc_sg_in)"""
+    names = ["raw_qc", "raw_mqc", "bb_out", "bb_qc", "bb_mqc", FILTERED_READS_DIR]
     if "fastp" in stages:
         names += ["fp_out", "fp_qc", "fp_mqc"]
     if "hostile" in stages:
         names.append("hostile_out")
-    return {name: study_dir / name for name in names}
+    return {"raw_reads": study_dir / raw_dir} | {name: study_dir / name for name in names}
 
 def final_stage(stages: frozenset[str]) -> tuple[str, str]:
     """(output directory key, stage name) of the last enabled stage"""
@@ -119,7 +119,7 @@ def process_study(
     status_subs: Sequence[common.StatusLike],
 ) -> bool:
     stages = PROFILES[args.profile]
-    dirs = study_dirs(study_dir, stages)
+    dirs = study_dirs(study_dir, stages, args.qc_sg_in)
     if not common.resume_allowed(args, [dirs[key] for key in STAGE_DIRS if key in dirs], study):
         return False
     for name, path in dirs.items():
@@ -149,14 +149,16 @@ def process_study(
 
 DESCRIPTION = "Perform QC on shotgun reads. Runs FastQC, MultiQC and BBDuk, plus fastp and Hostile depending on the profile."
 
-def add_args(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument(
+def add_args(parser: common.ArgParser) -> None:
+    group = parser.add_argument_group("QC module")
+    group.add_argument("--qc_sg_in", default="raw_reads", help="Input directory with the raw reads. (Default: raw_reads)")
+    group.add_argument(
         "--profile",
         choices=sorted(PROFILES),
         default="human_mag",
         help="Sample type and goal. human_mag: BBDuk+fastp+Hostile; human_taxonomy: BBDuk+Hostile; other_mag: BBDuk+fastp; other_taxonomy: BBDuk only. (Default: human_mag)",
     )
-    parser.add_argument("--keep_intermediate", action="store_true", help="Keep BBDuk/fastp reads after Hostile succeeded (default: delete them to save space).")
+    group.add_argument("--keep_intermediate", action="store_true", help="Keep BBDuk/fastp reads after Hostile succeeded (default: delete them to save space).")
 
 def run(args: argparse.Namespace) -> int:
     stages = PROFILES[args.profile]

@@ -101,14 +101,14 @@ def process_study(
     if not common.resume_allowed(args, [fp_out], study):
         return False
     sample_lists = common.get_split_size(args.split_size, samples)
-    common.run_concurrently(dedup_reads, args.split_size, sample_lists, status_subs, study, studies, study_dir / args.reads_dir, fp_out, utility_paths, args.threads)
+    common.run_concurrently(dedup_reads, args.split_size, sample_lists, status_subs, study, studies, study_dir / args.fastp_in, fp_out, utility_paths, args.threads)
     return True
 
 DESCRIPTION = "Reduce duplicate reads from SE or PE reads with fastp"
 
 def add_args(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument("-r", "--reads_dir", default="bb_out", help="Input directory name containing reads. (Default: bb_out)")
-    parser.add_argument("-o", "--fastp_out", default="fp_out", help="Output directory name for fastp reads. (Default: fp_out)")
+    parser.add_argument("--fastp_in", default="bb_out", help="Input directory with reads for fastp. (Default: bb_out)")
+    parser.add_argument("--fastp_out", default="fp_out", help="Output directory name for fastp reads. (Default: fp_out)")
 
 def run(args: argparse.Namespace) -> int:
     return study_runner.run_studies(args, "Deduplicating reads with fastp...", "fastp", REQUIRED_KEYS, process_study)

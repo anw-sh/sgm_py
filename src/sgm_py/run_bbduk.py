@@ -121,7 +121,7 @@ def process_study(
         return False
     sample_lists = common.get_split_size(args.split_size, samples)
     try:
-        common.run_concurrently(trim_reads, args.split_size, sample_lists, status_subs, study, studies, study_dir / args.reads_dir, bb_out, utility_paths, args.threads)
+        common.run_concurrently(trim_reads, args.split_size, sample_lists, status_subs, study, studies, study_dir / args.bbduk_in, bb_out, utility_paths, args.threads)
     finally:
         n_results = write_bbduk_results(bb_out, study_dir / "bb_out_counts.txt")
         logger.info("%s Collected %d BBDUk results lines for %s", common.EMOJI_SPARKLE, n_results, escape(study))
@@ -131,8 +131,8 @@ def process_study(
 DESCRIPTION = "Trimming SE or PE reads with BBDuk..."
 
 def add_args(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument("-r", "--reads_dir", default="raw_reads", help="Input directory name containing reads. (Default: raw_reads)")
-    parser.add_argument("-o", "--bbduk_out", default="bb_out", help="Output directory name for BBDuk filtered reads. (Default: bb_out)")
+    parser.add_argument("--bbduk_in", default="raw_reads", help="Input directory with reads for BBDuk. (Default: raw_reads)")
+    parser.add_argument("--bbduk_out", default="bb_out", help="Output directory name for BBDuk filtered reads. (Default: bb_out)")
 
 def run(args: argparse.Namespace) -> int:
     return study_runner.run_studies(args, "Trimming reads with BBDuk...", "BBDuk", REQUIRED_KEYS, process_study)

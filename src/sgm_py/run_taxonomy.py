@@ -15,18 +15,20 @@ logger = common.logger
 
 # --tool -> script; each script has run(args). Both merge the profiles of all studies (MPA format).
 TOOLS: dict[str, ModuleType] = {"kraken": run_kraken, "metaphlan": run_mpa}
+TOOL_NAMES = {"kraken": "Kraken2", "metaphlan": "MetaPhlAn"}
 DESCRIPTION = "Taxonomy module: profile filtered reads with Kraken2+Bracken or MetaPhlAn and merge the profiles of all studies..."
 
 
-def add_args(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument(
+def add_args(parser: common.ArgParser) -> None:
+    group = parser.add_argument_group("Taxonomy module")
+    group.add_argument(
         "--tool",
         choices=sorted(TOOLS),
         default="metaphlan",
         help="kraken: Kraken2+Bracken; metaphlan: MetaPhlAn. (Default: metaphlan)",
     )
-    parser.add_argument("-r", "--reads_dir", default="filtered_reads", help="Input directory name containing reads. (Default: filtered_reads)")
-    run_kraken.add_tool_args(parser)
+    for tool, script in TOOLS.items():  # each tool's own options, under its own heading
+        script.add_args(parser.add_argument_group(f"{TOOL_NAMES[tool]} options (used with --tool {tool})"))
 
 
 def run(args: argparse.Namespace) -> int:

@@ -117,13 +117,13 @@ def process_study(
     status_subs: Sequence[common.StatusLike],
 ) -> bool:
     common.set_waiting(status_subs)
-    return qc_reports(study_dir / args.reads_dir, study_dir / args.qc_dir, study_dir / args.mqc_dir, status_subs[0], study, studies, samples, args.threads, args.split_size, utility_paths)
+    return qc_reports(study_dir / args.qc_in, study_dir / args.qc_dir, study_dir / args.mqc_dir, status_subs[0], study, studies, samples, args.threads, args.split_size, utility_paths)
 
 
 DESCRIPTION = "Generate QC reports. Runs FastQC and MultiQC. Expects the name of the directory with reads, by default looks for raw_reads directory"
 
 def add_args(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument("-r", "--reads_dir", default="raw_reads", help="Input directory name containing reads. (Default: raw_reads)")
+    parser.add_argument("--qc_in", default="raw_reads", help="Input directory with reads for FastQC. (Default: raw_reads)")
     parser.add_argument("-q", "--qc_dir", default="raw_qc", help="Output directory name for QC reports. (Default: raw_qc)")
     parser.add_argument("-m", "--mqc_dir", default="raw_mqc", help="Output directory name for MultiQC report. (Default: raw_mqc)")
 

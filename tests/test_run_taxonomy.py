@@ -48,3 +48,12 @@ def test_exit_code_of_the_tool_is_returned(monkeypatch: pytest.MonkeyPatch) -> N
 def test_bad_tool_is_rejected() -> None:
     with pytest.raises(SystemExit):
         parse("--tool", "blast")
+
+
+def test_each_tool_reads_its_own_input_directory(calls: list[str], monkeypatch: pytest.MonkeyPatch) -> None:
+    got: list[tuple[str, str]] = []
+    monkeypatch.setattr(run_kraken, "run", lambda args: got.append(("kraken", args.kraken_in)) or 0)
+    monkeypatch.setattr(run_mpa, "run", lambda args: got.append(("metaphlan", args.mpa_in)) or 0)
+    rt.run(parse("--tool", "kraken", "--kraken_in", "k_reads"))
+    rt.run(parse("--mpa_in", "m_reads"))
+    assert got == [("kraken", "k_reads"), ("metaphlan", "m_reads")]

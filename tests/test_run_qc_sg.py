@@ -24,8 +24,8 @@ def make_study(tmp_path: Path, se_samples: tuple[str, ...] = ()) -> Path:
     return tmp_path / "PRJ1"
 
 
-def run(study_dir: Path, profile: str, *, keep: bool = False, resume: bool = False, samples: tuple[str, ...] = ("S1", "S2")) -> bool:
-    args = argparse.Namespace(profile=profile, keep_intermediate=keep, resume=resume, threads=2, split_size=1)
+def run(study_dir: Path, profile: str, *, keep: bool = False, resume: bool = False, samples: tuple[str, ...] = ("S1", "S2"), raw_dir: str = "raw_reads") -> bool:
+    args = argparse.Namespace(profile=profile, keep_intermediate=keep, resume=resume, threads=2, split_size=1, qc_sg_in=raw_dir)
     return sg.process_study(args, study_dir, "PRJ1", ["PRJ1"], list(samples), UTILS, [common.NullStatus()])
 
 
@@ -132,3 +132,13 @@ def test_resume_redoes_a_stage_that_was_killed_midway(tmp_path: Path, fake_tools
 def test_required_keys(profile: str, expected_extra: set[str]) -> None:
     base = {"FastQC", "MultiQC", "BBDuk", "bb_adapters"}
     assert set(sg.required_keys(sg.PROFILES[profile])) == base | expected_extra
+
+
+def test_input_directory_can_have_another_name(tmp_path: Path, fake_tools: FakeTools) -> None:
+    """--qc_sg_in: raw reads in reads/ instead of raw_reads/"""
+    study = make_study(tmp_path)
+    (study / "raw_reads").rename(study / "reads")
+    assert run(study, "other_taxonomy", raw_dir="reads")
+    assert f"{study}/reads/S1_R1.fastq.gz" in fake_tools.commands[0]  # FastQC on the renamed directory
+    assert any(f"in1={study}/reads/S1_R1.fastq.gz" in c for c in fake_tools.commands)  # BBDuk too
+    assert not (study / "raw_reads").exists()
