@@ -54,3 +54,9 @@ git add .
 git commit -m 'Add scripts'
 git push origin main
 ```
+
+### Bug fixes
+Using patches
+```bash
+git apply fixes/fix_filename.patch
+```
